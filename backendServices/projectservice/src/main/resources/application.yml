@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: projectservice
+
+  datasource:
+    url: jdbc:postgresql://192.168.0.5:5432/projectserviceDB
+    username: projectservice
+    password: projectservice
+
+  jpa:
+    properties:
+      hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update # Controls database schema generation
+    show-sql: true # Shows SQL queries in the logs
+

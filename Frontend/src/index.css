@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::after, *::before{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body{
+  @apply bg-neutral-900 font-poppins
+}
+
+input:focus ~ .input-text-focus{
+ @apply text-violet-500 bg-neutral-800 transform -translate-y-7 translate-x-1 scale-75
+}
+
+input ~ .input-text{
+ @apply text-violet-500 bg-neutral-800 transform -translate-y-7 translate-x-1 scale-75
+}
+
+.scroll-bar-hidden::-webkit-scrollbar{
+  width: 10px;
+}
+
+.project-rejected{
+  @apply bg-red-950 border-red-500
+}
+
+.project-accepted{
+  @apply bg-green-950 border-green-500
+}

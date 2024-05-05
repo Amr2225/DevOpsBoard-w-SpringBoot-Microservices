@@ -1,0 +1,167 @@
+version: '3.8'  # Docker Compose file format version
+
+services:
+  taskservice:
+    build: ./backendServices/taskservice
+    container_name: taskservice_container
+    ports:
+      - "8080:8080"  # Expose port 8080 from the container to the host
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.2
+    volumes:
+      - taskservice_data:/app/logs/taskservice  
+    restart: on-failure
+
+  projectservice:
+    build: ./backendServices/projectservice
+    container_name: projectservice_container
+    ports:
+      - "8081:8081"  # Expose port 8080 from the container to the host
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.9
+    volumes:
+      - projectservice_data:/app/logs/projectservice  
+    restart: on-failure
+
+  userservice:
+    build: ./backendServices/userservice
+    container_name: userservice_container
+    ports:
+      - "8082:8082"  # Expose port 8080 from the container to the host
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.10
+    volumes:
+      - userservice_data:/app/logs/userservice  
+    restart: on-failure
+
+  authservice:
+    build: ./backendServices/authservice
+    container_name: authservice_container
+    ports:
+      - "8083:8083"  # Expose port 8081 from the container to the host
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.3
+    volumes:
+      - authservice_data:/app/logs/authservice 
+    restart: on-failure
+
+  commentservice:
+    build: ./backendServices/commentservice
+    container_name: commentservice_container
+    ports:
+      - "8084:8084"  # Expose port 8081 from the container to the host
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.11
+    volumes:
+      - commentservice_data:/app/logs/commentservice 
+    restart: on-failure
+
+  taskserviceDB:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: taskserviceDB  # Name of the PostgreSQL container
+    environment:
+      POSTGRES_USER: taskservice  # Default PostgreSQL user
+      POSTGRES_PASSWORD: taskservice  # Password for the PostgreSQL user
+    ports:
+      - "5432:5432"  # Expose PostgreSQL on default port 5432
+    volumes:
+      - taskserviceDB_data:/var/lib/postgresql/data  # Persistent storage for PostgreSQL data
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.4
+    restart: unless-stopped
+
+  projectserviceDB:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: projectserviceDB  # Name of the PostgreSQL container
+    environment:
+      POSTGRES_USER: projectservice  # Default PostgreSQL user
+      POSTGRES_PASSWORD: projectservice  # Password for the PostgreSQL user
+    ports:
+      - "5433:5432"  # Expose PostgreSQL on default port 5433
+    volumes:
+      - projectserviceDB_data:/var/lib/postgresql/data  # Persistent storage for PostgreSQL data
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.5
+    restart: unless-stopped
+
+  userDB:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: userDB  # Name of the PostgreSQL container
+    environment:
+      POSTGRES_USER: myuser  # Default PostgreSQL user
+      POSTGRES_PASSWORD: mypassword  # Password for the PostgreSQL user 
+    ports:
+      - "5434:5432"  # Expose PostgreSQL on default port 5434
+    volumes:
+      - userDB_data:/var/lib/postgresql/data/  # Persistent storage for PostgreSQL data
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.6
+    restart: unless-stopped
+
+  commentserviceDB:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: commentserviceDB  # Name of the PostgreSQL container
+    environment:
+      POSTGRES_USER: commentservice  # Default PostgreSQL user
+      POSTGRES_PASSWORD: commentservice  # Password for the PostgreSQL user
+    ports:
+      - "5435:5432"  # Expose PostgreSQL on default port 5435
+    volumes:
+      - commentserviceDB_data:/var/lib/postgresql/data/  # Persistent storage for PostgreSQL data
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.7
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4  # Official pgAdmin 4 image
+    container_name: pgadmin_container2  # Name of the pgAdmin container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com  # pgAdmin default email for login
+      PGADMIN_DEFAULT_PASSWORD: admin  # pgAdmin default password for login
+    ports:
+      - "5050:80"  # Expose pgAdmin on port 5050
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin  # Persistent storage for pgAdmin settings
+    depends_on:
+      - taskserviceDB
+      - userDB 
+      - commentserviceDB # pgAdmin should start after PostgreSQL Databases
+    networks:
+      devops_network:
+        ipv4_address: 192.168.0.8
+    restart: unless-stopped
+
+volumes:
+  taskserviceDB_data:     # Persistent volume for PostgreSQL data
+    driver: local
+  projectserviceDB_data:  # Persistent volume for PostgreSQL data
+    driver: local
+  userDB_data:            # Persistent volume for PostgreSQL data
+    driver: local
+  commentserviceDB_data:  # Persistent volume for PostgreSQL data
+    driver: local
+  pgadmin_data:         
+
+  taskservice_data:
+  projectservice_data:
+  authservice_data:
+  userservice_data:
+  commentservice_data:
+
+networks:
+  devops_network:
+    driver: bridge
+    ipam:
+      driver: default  # Default IP address management driver
+      config:
+        - subnet: "192.168.0.0/24"  # Define the subnet with /24 indicating 256 addresses
+          gateway: "192.168.0.1"
