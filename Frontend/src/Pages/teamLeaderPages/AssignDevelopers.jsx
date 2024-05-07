@@ -6,8 +6,11 @@ import {
 } from "../../Redux/apis/projectsApi";
 import { useGetUsersQuery } from "../../Redux/apis/userApi";
 import { useSelector } from "react-redux";
+import { Message } from "../../Components/Helpers";
+import { useState } from "react";
 
 const AssignDevelopers = () => {
+  const [message, setMessage] = useState(["", "", false]);
   const [assignDev] = useAssignDevMutation();
   const [unAssignDev] = useUnAssignDevMutation();
   const { projectsData } = useSelector((state) => state.projects);
@@ -18,53 +21,29 @@ const AssignDevelopers = () => {
     });
   const params = useParams();
 
-  // console.log(projectsData);
-
   const project = projectsData.find((project) => project.projectId === +params.projectId);
-
-  //   const devs = [
-  //     {
-  //       id: 1,
-  //       name: "Amr Mohamed",
-  //     },
-  //     {
-  //       id: 2,
-  //       name: "Amr Mohamed",
-  //     },
-  //     {
-  //       id: 3,
-  //       name: "Amr Mohamed",
-  //     },
-  //   ];
-
-  //   const assignedProjects = [
-  //     {
-  //       userId: 1,
-  //       projectId: 2,
-  //     },
-  //     {
-  //       userId: 2,
-  //       projectId: 2,
-  //     },
-  //     {
-  //       userId: 2,
-  //       projectId: 1,
-  //     },
-  //   ];
 
   const AssignDev = async (userId, checked) => {
     if (checked) {
-      await assignDev({
-        userId: userId,
-        projectId: +params.projectId,
-        status: "pending",
-      });
+      try {
+        await assignDev({
+          userId: userId,
+          projectId: +params.projectId,
+          status: "pending",
+        }).unwrap();
+      } catch (err) {
+        setMessage([`Fatal Error Happend in project Service ${err.status}`, "error", true]);
+      }
     } else {
       //remove assigned dev from project;
-      await unAssignDev({
-        userId: userId,
-        projectId: +params.projectId,
-      });
+      try {
+        await unAssignDev({
+          userId: userId,
+          projectId: +params.projectId,
+        }).unwrap();
+      } catch (err) {
+        setMessage([`Fatal Error Happend in project Service ${err.status}`, "error", true]);
+      }
     }
   };
 
@@ -134,6 +113,7 @@ const AssignDevelopers = () => {
             </div>
           ))}
       </div>
+      {message[2] && <Message message={message[0]} status={message[1]} setMessage={setMessage} />}
     </div>
   );
 };

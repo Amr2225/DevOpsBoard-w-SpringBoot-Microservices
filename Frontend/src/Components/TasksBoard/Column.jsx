@@ -50,7 +50,7 @@ const Column = ({ title, headingColor, column, setIsCardMenuActive }) => {
         }
       }
 
-      updateTask({ ...cardToTransfer, projectId: params.projectId }); //Project id will be passed as a prop
+      updateTask({ ...cardToTransfer, projectId: params.projectId }).unwrap(); //Project id will be passed as a prop
     }
   };
 

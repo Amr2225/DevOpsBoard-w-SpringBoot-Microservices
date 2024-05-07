@@ -20,21 +20,23 @@ import {
 import { useGetAcceptedProjectsQuery, useGetProjectsQuery } from "../Redux/apis/projectsApi";
 import { useSelector } from "react-redux";
 import { persistor } from "../Redux/store";
+import { Message } from "./Helpers";
 
 const Sidebar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isProjectContainerOpen, setIsProjectContainerOpen] = useState(false);
+  const [message, setMessage] = useState(["", "", false]);
 
   const { projectsData } = useSelector((state) => state.projects);
   const { userData } = useSelector((state) => state.user);
-
+  let data;
   if (userData.role === "1") {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useGetAcceptedProjectsQuery(userData.id);
+    data = useGetAcceptedProjectsQuery(userData.id);
   } else if (userData.role === "2") {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useGetProjectsQuery();
+    data = useGetProjectsQuery();
   }
 
   // Animation Controls for the sidebar
@@ -51,6 +53,12 @@ const Sidebar = () => {
       arrowControls.start("close");
     }
   }, [isOpen, arrowControls, navControls]);
+
+  useEffect(() => {
+    if (data.isError) {
+      setMessage([`Error Happend in Projects Service ${data.error.status}`, "error", true]);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (isProjectContainerOpen) {
@@ -204,6 +212,7 @@ const Sidebar = () => {
           </>
         )}
       </div>
+      {message[2] && <Message message={message[0]} status={message[1]} setMessage={setMessage} />}
     </motion.nav>
   );
 };

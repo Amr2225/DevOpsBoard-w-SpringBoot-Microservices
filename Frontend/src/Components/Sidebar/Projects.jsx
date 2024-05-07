@@ -5,10 +5,12 @@ import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDeleteProjectMutation } from "../../Redux/apis/projectsApi";
 import { UpdateProject } from "../Modals";
+import { Message } from "../Helpers";
 
 const Projects = ({ projectId, title, link }) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [isUpdateMenuOpen, setIsUpdateMenuOpen] = useState(false);
+  const [message, setMessage] = useState(["", "", false]);
 
   const { userData } = useSelector((state) => state.user);
   const [deleteProject] = useDeleteProjectMutation();
@@ -21,8 +23,11 @@ const Projects = ({ projectId, title, link }) => {
     if (+params.projectId === +projectId) {
       navigate("/TeamLeader");
     }
-
-    deleteProject(projectId);
+    try {
+      deleteProject(projectId).unwrap();
+    } catch (err) {
+      setMessage(["Fatal Error Happend", "error", true]);
+    }
   };
 
   return (
@@ -78,6 +83,7 @@ const Projects = ({ projectId, title, link }) => {
       {isUpdateMenuOpen && (
         <UpdateProject id={projectId} projectTitle={title} setIsMenuOpen={setIsUpdateMenuOpen} />
       )}
+      {message[2] && <Message message={message[0]} status={message[1]} setMessage={setMessage} />}
     </div>
   );
 };

@@ -24,6 +24,7 @@ const authApi = createApi({
       onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
         try {
           const { data } = await queryFulfilled;
+
           dispatch(setAuthToken(data));
         } catch (err) {
           console.error("Error ", err);

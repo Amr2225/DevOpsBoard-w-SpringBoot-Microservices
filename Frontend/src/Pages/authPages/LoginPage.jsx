@@ -22,6 +22,8 @@ const LoginPage = () => {
         navigate("/");
       }, 300);
     }
+
+    return () => clearTimeout();
   }, [isAuthed, navigate]);
 
   const handleLogin = async (e) => {
@@ -42,7 +44,7 @@ const LoginPage = () => {
       setShowMessage(["login successfully", "success", true]);
     } catch (err) {
       if (err.status === 400) setShowMessage(["Email or password is invalid", "error", true]);
-      else console.log("Fatal Error ", err);
+      else setShowMessage(["testing", "error", true]);
     }
   };
 
