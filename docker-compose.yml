@@ -67,6 +67,7 @@ services:
     environment:
       POSTGRES_USER: taskservice  # Default PostgreSQL user
       POSTGRES_PASSWORD: taskservice  # Password for the PostgreSQL user
+      POSTGRES_DB: taskserviceDB
     ports:
       - "5432:5432"  # Expose PostgreSQL on default port 5432
     volumes:
@@ -82,6 +83,7 @@ services:
     environment:
       POSTGRES_USER: projectservice  # Default PostgreSQL user
       POSTGRES_PASSWORD: projectservice  # Password for the PostgreSQL user
+      POSTGRES_DB: projectserviceDB
     ports:
       - "5433:5432"  # Expose PostgreSQL on default port 5433
     volumes:
@@ -97,6 +99,7 @@ services:
     environment:
       POSTGRES_USER: myuser  # Default PostgreSQL user
       POSTGRES_PASSWORD: mypassword  # Password for the PostgreSQL user 
+      POSTGRES_DB: userDB
     ports:
       - "5434:5432"  # Expose PostgreSQL on default port 5434
     volumes:
@@ -112,6 +115,7 @@ services:
     environment:
       POSTGRES_USER: commentservice  # Default PostgreSQL user
       POSTGRES_PASSWORD: commentservice  # Password for the PostgreSQL user
+      POSTGRES_DB: commentserviceDB
     ports:
       - "5435:5432"  # Expose PostgreSQL on default port 5435
     volumes:
@@ -134,6 +138,7 @@ services:
     depends_on:
       - taskserviceDB
       - userDB 
+      - projectserviceDB
       - commentserviceDB # pgAdmin should start after PostgreSQL Databases
     networks:
       devops_network:
