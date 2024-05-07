@@ -1,5 +1,7 @@
 server:
   port: 8083
+  error:
+    include-message: always
 
 spring:
   application:
@@ -16,5 +18,5 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update # Controls database schema generation
-    show-sql: true # Shows SQL queries in the logs 192.168.128.3
+    show-sql: true # Shows SQL queries in the logs 192.168.0.6
 

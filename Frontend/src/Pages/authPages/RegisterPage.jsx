@@ -57,7 +57,7 @@ const RegisterPage = () => {
         navigate("/login");
       }, 1000);
     } catch (err) {
-      if (err.status == 400) setShowMessage([`Invalid Email `, "error", true]);
+      if (err.status == 400) setShowMessage([`${err.data.message} `, "error", true]);
       else setShowMessage([`Error happend ${err.status}`, "error", true]);
     }
   };
