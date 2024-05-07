@@ -9,6 +9,7 @@ const DevProjectList = () => {
   const { data: pendingProjects, isSuccess } = useGetPendingProjectsQuery(userData.id);
   const [UpdateProjectStatus] = useUpdateProjectStatusMutation();
 
+  console.log(pendingProjects);
   return (
     <div>
       <h1 className='text-neutral-100 text-3xl font-bold'>Projects Lists</h1>

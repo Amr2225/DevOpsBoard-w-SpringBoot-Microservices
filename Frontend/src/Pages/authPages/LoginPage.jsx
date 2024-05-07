@@ -41,7 +41,7 @@ const LoginPage = () => {
       }).unwrap(); //unwarping the response to get the error message
       setShowMessage(["login successfully", "success", true]);
     } catch (err) {
-      if (err.status === 400) setShowMessage([err.data, "error", true]);
+      if (err.status === 400) setShowMessage(["Email or password is invalid", "error", true]);
       else console.log("Fatal Error ", err);
     }
   };

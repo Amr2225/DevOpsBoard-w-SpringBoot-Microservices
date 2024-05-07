@@ -7,10 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskResponse {
-    private Integer id;
-    private String title;
-    private String description;
-    private String status;
-    private Boolean editable;
+public class AssignedDevsResponse {
+    private Integer userId;
 }

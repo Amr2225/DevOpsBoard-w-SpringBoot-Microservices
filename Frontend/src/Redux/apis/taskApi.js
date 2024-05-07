@@ -4,7 +4,7 @@ import { setTasksData } from "../reducers/taskReducer";
 const taskApi = createApi({
   reducerPath: "taskApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5164/api/Task/",
+    baseUrl: "http://localhost:8080/api/Task/",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().user.token;
       if (token) {
@@ -17,6 +17,14 @@ const taskApi = createApi({
   endpoints: (builder) => ({
     //Dev API
     //READ
+    getAllTasks: builder.query({
+      query: () => ({
+        url: "getTaskss",
+        method: "GET",
+      }),
+    }),
+
+    //Assigned Task
     getTasks: builder.query({
       query: ({ id, role, projectId }) => ({
         url: `GetTasks?userId=${id}&role=${role}&projectId=${projectId}`,
@@ -24,10 +32,8 @@ const taskApi = createApi({
       }),
       onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
         try {
-          const {
-            data: { value },
-          } = await queryFulfilled;
-          dispatch(setTasksData(value));
+          const { data } = await queryFulfilled;
+          dispatch(setTasksData(data));
         } catch (e) {
           console.error(e);
         }
@@ -39,7 +45,7 @@ const taskApi = createApi({
     //CREATE
     createTask: builder.mutation({
       query: (newTaskData) => ({
-        url: "Create",
+        url: "AddTask",
         method: "POST",
         body: newTaskData,
       }),
@@ -59,7 +65,7 @@ const taskApi = createApi({
     //DELETE
     deleteTask: builder.mutation({
       query: (id) => ({
-        url: `DeleteTask?id=${id}`,
+        url: `DeleteTask?taskId=${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["tasks"],
@@ -82,10 +88,6 @@ const taskApi = createApi({
         url: `GetAssignedDevs?taskId=${taskId}`,
         method: "GET",
       }),
-
-      transformResponse: (res) => {
-        return res.value;
-      },
       providesTags: ["assignedDevs"],
     }),
 
@@ -110,14 +112,6 @@ const taskApi = createApi({
         url: "GetAllAttachedTasks",
         method: "GET",
       }),
-
-      transformResponse: (res) => {
-        return res.value.map((user) => ({
-          userName: user.users.firstName + " " + user.users.lastName,
-          task: user.tasks.title,
-          attachment: user.attachments,
-        }));
-      },
     }),
 
     //ASSIGN ATTACHMENT
@@ -126,7 +120,6 @@ const taskApi = createApi({
         url: "AttachFile",
         method: "POST",
         body: data,
-        headers: { "Custome-Header": "value" },
       }),
     }),
   }),
@@ -136,6 +129,7 @@ export const {
   useGetAssignedDevsQuery,
   useGetUnassignedDevsQuery,
   useGetAttachmentsQuery,
+  useGetAllTasksQuery,
   useCreateTaskMutation,
   useUpdateTaskMutation,
   useDeleteTaskMutation,

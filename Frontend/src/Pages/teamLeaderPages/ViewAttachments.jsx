@@ -1,7 +1,34 @@
-import { useGetAttachmentsQuery } from "../../Redux/apis/taskApi";
+import { Error, LoadingSpinner } from "../../Components";
+import { useGetAllTasksQuery, useGetAttachmentsQuery } from "../../Redux/apis/taskApi";
+import { useGetUsersQuery } from "../../Redux/apis/userApi";
 
 const ViewAttachments = () => {
-  const { data, isSuccess } = useGetAttachmentsQuery();
+  const { data, isSuccess, isError, isLoading } = useGetAttachmentsQuery();
+  const { data: userData, isSuccess: userDataSuccess } = useGetUsersQuery();
+  const { data: taskData, isSuccess: taskDataSuccess } = useGetAllTasksQuery();
+
+  let attahmentsData;
+  if (isSuccess && userDataSuccess && taskDataSuccess) {
+    attahmentsData = data.map((attachmentData) => {
+      const foundUser = userData.find((user) => user.id === attachmentData.userId);
+      const foundTask = taskData.find((task) => task.id === attachmentData.taskId);
+      if (foundUser && foundTask) {
+        return {
+          userName: foundUser.name,
+          task: foundTask.title,
+          attachment: attachmentData.attachment,
+        };
+      }
+    });
+  }
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <Error />;
+  }
 
   return (
     <div>
@@ -11,24 +38,18 @@ const ViewAttachments = () => {
           <tr>
             <th className='p-2 text-lg'>Developer</th>
             <th className='p-2 text-lg'>Task</th>
-            <th className='p-2 text-lg'>Actions</th>
+            <th className='p-2 text-lg'>Attachment</th>
           </tr>
         </thead>
         <tbody>
           {isSuccess &&
-            data.map((task, index) => (
+            userDataSuccess &&
+            taskDataSuccess &&
+            attahmentsData.map((task, index) => (
               <tr key={index} className='border-b border-neutral-700'>
                 <td className='p-2 capitalize'>{task.userName}</td>
                 <td className='p-2'>{task.task}</td>
-                <td className='p-2 flex gap-2'>
-                  <a
-                    href={task.attachment}
-                    target='_blank'
-                    className='bg-green-700 px-4 py-0.5 rounded-sm w-[90%] hover:bg-green-800 hover:scale-95 transition duration-100 text-center'
-                  >
-                    View
-                  </a>
-                </td>
+                <td className='p-2 flex gap-2 text-green-700'>{task.attachment}</td>
               </tr>
             ))}
         </tbody>

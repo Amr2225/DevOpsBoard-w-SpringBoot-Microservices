@@ -20,9 +20,9 @@ const userSlice = createSlice({
       const user = jwtDecode(state.token);
       state.userData = {
         email: user.email,
-        id: user.nameid,
-        userName: user.unique_name,
-        role: user.role,
+        id: user.id,
+        userName: user.userName,
+        role: user.roleId + "",
         exp: user.exp,
       };
       state.isAuthed = true;

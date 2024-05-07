@@ -14,7 +14,7 @@ const TasksBoard = () => {
   const params = useParams();
 
   const { isLoading, isError } = useGetTasksQuery(
-    { id: userData.id, role: userData.role, projectId: params.projectId },
+    { id: +userData.id, role: +userData.role, projectId: +params.projectId },
     { refetchOnMountOrArgChange: true }
   );
 

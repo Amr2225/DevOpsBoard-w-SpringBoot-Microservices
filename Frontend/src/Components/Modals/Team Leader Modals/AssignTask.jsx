@@ -1,13 +1,11 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
 
-import {
-  useAssignTasksMutation,
-  useGetAssignedDevsQuery,
-  useGetUnassignedDevsQuery,
-} from "../../../Redux/apis/taskApi";
+import { useAssignTasksMutation, useGetAssignedDevsQuery } from "../../../Redux/apis/taskApi";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { useGetUsersQuery } from "../../../Redux/apis/userApi";
+import { useGetAssignedProjectsQuery } from "../../../Redux/apis/projectsApi";
 
 const AssignTask = ({ setIsMenuOpen, taskId }) => {
   const { projectsData } = useSelector((state) => state.projects);
@@ -15,13 +13,43 @@ const AssignTask = ({ setIsMenuOpen, taskId }) => {
   const params = useParams();
   const containerRef = useRef(null);
 
-  const { data: assignedDevs, isSuccess: isAssignedDevsSuccess } = useGetAssignedDevsQuery(+taskId);
-  const { data: unassignedDevs, isSuccess: isUnassignedDevsSuccess } = useGetUnassignedDevsQuery(
+  const [assignTask] = useAssignTasksMutation();
+  const { data: users, isSuccess: usersSuccess } = useGetUsersQuery();
+  const { data: assignedProjectsData, isSuccess: isProjectDataSuccess } =
+    useGetAssignedProjectsQuery();
+  const { data: assignedDevsData, isSuccess: isAssignedDevsSuccess } = useGetAssignedDevsQuery(
     +taskId
   );
-  const [assignTask] = useAssignTasksMutation();
 
   const project = projectsData.find((project) => project.projectId === +params.projectId);
+
+  let assignedDevs;
+  let unassignedDevs;
+  if (usersSuccess && isAssignedDevsSuccess && isProjectDataSuccess) {
+    //logic to get the username from the assigned devs apis
+    assignedDevs = assignedDevsData.map((assignedDev) => {
+      const foundUser = users.find((user) => user.id === assignedDev.userId);
+      if (foundUser) {
+        return { id: foundUser.id, userName: foundUser.name };
+      }
+    });
+  }
+
+  if (usersSuccess && isAssignedDevsSuccess && isProjectDataSuccess) {
+    //logic to get the username from the assigned devs apis
+
+    unassignedDevs = users.filter((user) => {
+      const isAssigned = assignedDevsData.some((dev) => +dev.userId === +user.id);
+      const isAccepeted = assignedProjectsData.some(
+        (project) =>
+          +project.projectId === +params.projectId &&
+          project.status === "accepted" &&
+          +project.userId === user.id
+      );
+      // const isAccepeted = acceptedUsers.includes(user.id);
+      return !isAssigned && isAccepeted;
+    });
+  }
 
   const handleMenuClose = (e) => {
     if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -51,7 +79,10 @@ const AssignTask = ({ setIsMenuOpen, taskId }) => {
         <h1 className='border-b mb-8 text-2xl pb-1'>{project.title}</h1>
         <h3 className='mb-4 text-lg font-bold text-green-500'>Assigned Developers</h3>
         <ol className='ml-10 mb-5 flex gap-3 flex-col'>
+          {isAssignedDevsSuccess && usersSuccess && console.log(assignedDevs)}
           {isAssignedDevsSuccess &&
+            usersSuccess &&
+            isProjectDataSuccess &&
             assignedDevs.map((dev) => (
               <li key={dev.id} className='list-decimal text-lg capitalize'>
                 {dev.userName}
@@ -62,7 +93,9 @@ const AssignTask = ({ setIsMenuOpen, taskId }) => {
           <>
             <h3 className='mb-4 text-lg font-bold text-red-600'>Assign Developers</h3>
             <ol className='ml-5 flex gap-3 flex-col'>
-              {isUnassignedDevsSuccess &&
+              {usersSuccess &&
+                usersSuccess &&
+                isProjectDataSuccess &&
                 unassignedDevs.map((dev, index) => (
                   <li
                     key={dev.id}
@@ -70,7 +103,7 @@ const AssignTask = ({ setIsMenuOpen, taskId }) => {
                   >
                     <span>
                       {`${index + 1}. `}
-                      {dev.userName}
+                      {dev.name}
                     </span>
                     <button
                       onClick={() => assignDev(dev.id)}

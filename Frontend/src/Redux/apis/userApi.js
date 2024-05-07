@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5164/api/User/",
+    baseUrl: "http://localhost:8082/api/User/",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().user.token;
       if (token) {
@@ -20,14 +20,30 @@ const userApi = createApi({
       }),
 
       transformResponse: (res) => {
-        return res.value.map((user) => ({
+        const users = res.filter((user) => user.role === 1);
+        return users.map((user) => ({
           id: user.id,
-          name: user.firstName + " " + user.lastName,
+          name: user.userName,
+        }));
+      },
+    }),
+
+    getAllUsers: builder.query({
+      query: () => ({
+        url: "GetAll",
+        method: "GET",
+      }),
+
+      transformResponse: (res) => {
+        return res.map((user) => ({
+          id: user.id,
+          name: user.userName,
+          role: user.role,
         }));
       },
     }),
   }),
 });
 
-export const { useGetUsersQuery } = userApi;
+export const { useGetUsersQuery, useGetAllUsersQuery } = userApi;
 export default userApi;

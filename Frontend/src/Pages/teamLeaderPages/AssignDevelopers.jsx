@@ -18,7 +18,7 @@ const AssignDevelopers = () => {
     });
   const params = useParams();
 
-  console.log(projectsData);
+  // console.log(projectsData);
 
   const project = projectsData.find((project) => project.projectId === +params.projectId);
 
@@ -56,14 +56,14 @@ const AssignDevelopers = () => {
     if (checked) {
       await assignDev({
         userId: userId,
-        projectId: params.projectId,
+        projectId: +params.projectId,
         status: "pending",
       });
     } else {
       //remove assigned dev from project;
       await unAssignDev({
         userId: userId,
-        projectId: params.projectId,
+        projectId: +params.projectId,
       });
     }
   };

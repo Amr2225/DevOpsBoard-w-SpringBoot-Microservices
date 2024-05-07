@@ -16,9 +16,9 @@ const AddCard = () => {
     if (!text.trim().length) return;
     await createTask({
       title: text.trim(),
-      status: "backlog",
       description: "",
-      projectId: params.projectId,
+      projectId: +params.projectId,
+      status: "backlog",
     });
 
     setIsActive(false);

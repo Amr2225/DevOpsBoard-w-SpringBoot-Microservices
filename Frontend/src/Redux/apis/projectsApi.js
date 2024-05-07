@@ -4,7 +4,7 @@ import { setProjectData } from "../reducers/projectsReducer";
 const projectsApi = createApi({
   reducerPath: "projectsApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5164/api/Project/",
+    baseUrl: "http://localhost:8081/api/Project/",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().user.token;
       if (token) {
@@ -19,17 +19,16 @@ const projectsApi = createApi({
     //SAVES THE DATA IN THE STORE TO BE EASLY ACCESSIBLE IN THE SIDEBAR FOR THE DEV
     getAcceptedProjects: builder.query({
       query: (id) => ({
-        url: `GetAcceptedProjects?userId=${id}`,
+        url: `GetProjectsByStatus?userId=${id}&status=accepted`,
         method: "GET",
       }),
       providesTags: ["acceptedProjects"],
       transformResponse: (res) => {
-        console.log(res);
-        return res.value.map((project) => ({
+        return res.map((project) => ({
           projectId: project.projectId,
           userId: project.userId,
           status: project.status,
-          title: project.projects.title,
+          title: project.title,
         }));
       },
       onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
@@ -44,32 +43,33 @@ const projectsApi = createApi({
 
     getPendingProjects: builder.query({
       query: (id) => ({
-        url: `GetPendingProjects?userId=${id}`,
+        url: `GetProjectsByStatus?userId=${id}&status=pending`,
         method: "GET",
       }),
 
       providesTags: ["pendingProjects"],
       transformResponse: (res) => {
-        return res.value.map((project) => ({
+        console.log(res);
+        return res.map((project) => ({
           projectId: project.projectId,
           userId: project.userId,
           status: project.status,
-          title: project.projects.title,
+          title: project.title,
         }));
       },
     }),
 
     getRejectedProjects: builder.query({
       query: (id) => ({
-        url: `GetRejectedProjects?userId=${id}`,
+        url: `GetProjectsByStatus?userId=${id}&status=rejected`,
         method: "GET",
       }),
       transformResponse: (res) => {
-        return res.value.map((project) => ({
+        return res.map((project) => ({
           projectId: project.projectId,
           userId: project.userId,
           status: project.status,
-          title: project.projects.title,
+          title: project.title,
         }));
       },
     }),
@@ -93,8 +93,7 @@ const projectsApi = createApi({
 
       providesTags: ["assignedProjects"],
       transformResponse: (res) => {
-        console.log(res.value);
-        return res.value.map((project) => ({
+        return res.map((project) => ({
           projectId: project.projectId,
           userId: project.userId,
           status: project.status,
@@ -132,7 +131,6 @@ const projectsApi = createApi({
       onQueryStarted: async (arg, { queryFulfilled, dispatch }) => {
         try {
           const { data } = await queryFulfilled;
-          console.log(data);
           dispatch(
             setProjectData(data.map((project) => ({ projectId: project.id, title: project.title })))
           );
@@ -155,9 +153,9 @@ const projectsApi = createApi({
     //UPDATE
     updateProject: builder.mutation({
       query: (newProject) => ({
-        url: `UpdateProject?id=${newProject.id}`,
+        url: `UpdateProject`,
         method: "PUT",
-        body: { title: newProject.title },
+        body: newProject,
       }),
       invalidatesTags: ["projectData"],
     }),
@@ -165,7 +163,7 @@ const projectsApi = createApi({
     //DELETE
     deleteProject: builder.mutation({
       query: (id) => ({
-        url: `DeleteProject?id=${id}`,
+        url: `DeleteProject?projectId=${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["projectData"],

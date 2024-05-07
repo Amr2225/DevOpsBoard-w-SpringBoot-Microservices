@@ -29,19 +29,14 @@ const Attachment = ({ setIsMenuOpen, taskId }) => {
       setMessage(["No file selected", "error", true]);
     }
 
-    const fileData = new FormData();
-    fileData.append("UserId", +userData.id);
-    fileData.append("TaskId", +taskId);
-    fileData.append("File", file);
-
     try {
-      await assignAttachment(fileData).unwrap();
+      await assignAttachment({ userId: userData.id, taskId: taskId, attachment: file }).unwrap();
       setMessage(["File Uploaded Successfully", "success", true]);
       setTimeout(() => {
         setIsMenuOpen(false);
       }, 1000);
     } catch (err) {
-      console.log(err);
+      setMessage(["Error Happend While uploading you file", "error", true]);
     }
   };
 
@@ -50,7 +45,7 @@ const Attachment = ({ setIsMenuOpen, taskId }) => {
       setMessage(["Only add One File is allowed", "error", true]);
       return;
     }
-    setFile(acceptedFiles[0]);
+    setFile(acceptedFiles[0].name);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -78,7 +73,7 @@ const Attachment = ({ setIsMenuOpen, taskId }) => {
               variants={itemVariants}
               className='bg-neutral-700/30 border border-neutral-600 w-full py-1.5 rounded-sm px-2 mt-2'
             >
-              {file.name}
+              {file}
             </motion.div>
           </motion.div>
         ) : (

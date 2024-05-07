@@ -2,13 +2,15 @@ import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
-
 import { BiPencil } from "react-icons/bi";
+
+import Comments from "./Comments";
+import Attachment from "./Attahment/Attachment";
+import { Error, LoadingSpinner } from "../Helpers";
 
 import { useUpdateTaskMutation } from "../../Redux/apis/taskApi";
 import { useAddCommentMutation, useGetCommnetsQuery } from "../../Redux/apis/commentsApi";
-import Comments from "./Comments";
-import Attachment from "./Attahment/Attachment";
+import { useGetAllUsersQuery } from "../../Redux/apis/userApi";
 
 const CardMenu = ({ title, taskId, status, description, setIsCardMenuOpen }) => {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -21,11 +23,34 @@ const CardMenu = ({ title, taskId, status, description, setIsCardMenuOpen }) => 
 
   const [updateTask] = useUpdateTaskMutation();
   const [addComment] = useAddCommentMutation();
-  const { data: allCommentsData, isSuccess } = useGetCommnetsQuery(+taskId);
+  const { data: CommentsData, isSuccess, isError, isLoading } = useGetCommnetsQuery(+taskId);
+  const { data: allUsersData, isSuccess: usersDataSuccess } = useGetAllUsersQuery();
 
   const { userData } = useSelector((state) => state.user);
   const containerRef = useRef(null);
   const params = useParams();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <Error />;
+  }
+
+  let allCommentsData;
+  if (isSuccess && usersDataSuccess) {
+    allCommentsData = CommentsData.map((commentData) => {
+      const foundUser = allUsersData.find((user) => user.id === commentData.userId);
+      if (foundUser) {
+        return {
+          ...commentData,
+          userName: foundUser.name,
+          role: foundUser.role === "2" ? "Team Leader" : "Developer",
+        };
+      }
+    });
+  }
 
   const handleMenuClose = (e) => {
     if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -89,6 +114,7 @@ const CardMenu = ({ title, taskId, status, description, setIsCardMenuOpen }) => 
         className='bg-neutral-800 border border-neutral-700 shadow-xl rounded-md text-neutral-100 p-10 w-[600px] h-[600px] overflow-scroll overflow-x-hidden scroll-bar-webkit'
       >
         {/* Editing Title Logic */}
+        {usersDataSuccess && isSuccess && console.log(allCommentsData)}
         {!isEditingTitle ? (
           <>
             <span className='border-b mb-8 pb-1 flex items-center gap-4'>
@@ -163,7 +189,9 @@ const CardMenu = ({ title, taskId, status, description, setIsCardMenuOpen }) => 
         {/* End of the Editing Description Logic */}
 
         {/* Comments Section */}
-        {isSuccess && allCommentsData.map((comment) => <Comments key={comment.id} {...comment} />)}
+        {isSuccess &&
+          usersDataSuccess &&
+          allCommentsData.map((comment) => <Comments key={comment.id} {...comment} />)}
         {/* End of Comments Section */}
 
         {/* Add Comment Section */}

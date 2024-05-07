@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.devops.taskservice.dto.AssignedDevsResponse;
 import com.devops.taskservice.dto.AssignedTaskRequest;
 import com.devops.taskservice.dto.TaskRequest;
 import com.devops.taskservice.dto.TaskResponse;
@@ -65,7 +66,7 @@ public class TaskService {
         List<AssignedTask> assignedUsersToTask = assignedTaskRepository.findById_UserId(userId);
         for (AssignedTask assignedTask : assignedUsersToTask) {
             for (TaskResponse task : tasksToSent) {
-                if (task.getId() == assignedTask.getId().getTaskId()) {
+                if (task.getId().equals(assignedTask.getId().getTaskId())) {
                     task.setEditable(true);
                 }
             }
@@ -133,7 +134,7 @@ public class TaskService {
         List<AssignedTaskRequest> taskToSent = new ArrayList<AssignedTaskRequest>();
 
         for (AssignedTask task : tasks) {
-            if (!task.getAttachment().isEmpty()) {
+            if (task.getAttachment() != null) {
                 taskToSent.add(new AssignedTaskRequest(task.getId().getUserId(), task.getId().getTaskId(),
                         task.getAttachment()));
             }
@@ -143,14 +144,14 @@ public class TaskService {
     }
 
     // GET ALL THE ASSIGNED DEVS BASED ON THE TASK --DEV & TEAM LEADER API--
-    public List<Integer> getAssignedDevs(Integer taskId) {
+    public List<AssignedDevsResponse> getAssignedDevs(Integer taskId) {
         List<AssignedTask> assignedTasks = assignedTaskRepository.findById_TaskId(taskId);
         if (assignedTasks == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found: " + taskId);
 
-        List<Integer> usersId = new ArrayList<Integer>();
+        List<AssignedDevsResponse> usersId = new ArrayList<AssignedDevsResponse>();
         for (AssignedTask assignedTask : assignedTasks) {
-            usersId.add(assignedTask.getId().getUserId());
+            usersId.add(new AssignedDevsResponse(assignedTask.getId().getUserId()));
         }
 
         return usersId;

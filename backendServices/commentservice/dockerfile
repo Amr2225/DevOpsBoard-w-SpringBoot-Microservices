@@ -2,7 +2,11 @@ FROM openjdk:17-jdk-slim AS build
 
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
-RUN ./mvnw dependency:resolve
+
+# clean up the file
+RUN sed -i 's/\r$//' mvnw
+# run with the SH path
+RUN /bin/sh mvnw dependency:resolve
 
 COPY src src
 RUN ./mvnw package

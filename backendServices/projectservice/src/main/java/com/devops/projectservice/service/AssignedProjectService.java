@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.devops.projectservice.dto.AssignedProjectRequest;
+import com.devops.projectservice.dto.AssignedProjectResponse;
+import com.devops.projectservice.model.Project;
 import com.devops.projectservice.model.ProjectAssigned;
 import com.devops.projectservice.model.ProjectAssignedId;
 import com.devops.projectservice.repository.AssignedProjectRepository;
+import com.devops.projectservice.repository.ProjectRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class AssignedProjectService {
 
     private final AssignedProjectRepository repo;
+    private final ProjectRepository projectRepo;
 
     public void AssignProject(AssignedProjectRequest req) {
         ProjectAssignedId id = new ProjectAssignedId(req.getUserId(), req.getProjectId());
@@ -27,14 +31,15 @@ public class AssignedProjectService {
         repo.save(assignedProject);
     }
 
-    public List<AssignedProjectRequest> getByStatus(Integer userId, String status) {
+    public List<AssignedProjectResponse> getByStatus(Integer userId, String status) {
         List<ProjectAssigned> projects = repo.findById_UserIdAndStatus(userId, status);
 
-        List<AssignedProjectRequest> res = new ArrayList<AssignedProjectRequest>();
+        List<AssignedProjectResponse> res = new ArrayList<AssignedProjectResponse>();
 
         for (ProjectAssigned project : projects) {
-            res.add(new AssignedProjectRequest(project.getId().getUserId(),
-                    project.getId().getProjectId(), project.getStatus()));
+            Project mainProject = projectRepo.findById(project.getId().getProjectId()).get();
+            res.add(new AssignedProjectResponse(project.getId().getUserId(),
+                    project.getId().getProjectId(), project.getStatus(), mainProject.getTitle()));
         }
 
         return res;

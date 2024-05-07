@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { motion, AnimatePresence } from "framer-motion";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDeleteProjectMutation } from "../../Redux/apis/projectsApi";
 import { UpdateProject } from "../Modals";
@@ -13,6 +13,17 @@ const Projects = ({ projectId, title, link }) => {
   const { userData } = useSelector((state) => state.user);
   const [deleteProject] = useDeleteProjectMutation();
   const navigate = useNavigate();
+  const params = useParams();
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+
+    if (+params.projectId === +projectId) {
+      navigate("/TeamLeader");
+    }
+
+    deleteProject(projectId);
+  };
 
   return (
     <div className='flex justify-between items-center '>
@@ -55,10 +66,7 @@ const Projects = ({ projectId, title, link }) => {
                     Assign
                   </button>
 
-                  <button
-                    onClick={() => deleteProject(projectId)}
-                    className='text-red-400 hover:underline'
-                  >
+                  <button onClick={handleDelete} className='text-red-400 hover:underline'>
                     Delete
                   </button>
                 </motion.div>

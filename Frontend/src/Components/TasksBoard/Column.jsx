@@ -14,11 +14,12 @@ const Column = ({ title, headingColor, column, setIsCardMenuActive }) => {
   const [isAddAttahcmentActive, setIsAddAttahcmentActive] = useState(false);
 
   const [updateTask] = useUpdateTaskMutation();
-  const { taskData } = useSelector((state) => state.tasks);
+  const { taskData, isSucess } = useSelector((state) => state.tasks);
   const { userData } = useSelector((state) => state.user);
   const params = useParams();
 
-  const filteredCards = taskData.filter((data) => data.status === column);
+  let filteredCards;
+  filteredCards = taskData.filter((data) => data.status === column);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -58,7 +59,7 @@ const Column = ({ title, headingColor, column, setIsCardMenuActive }) => {
       <div className='w-56 shrink-0'>
         <div className='mb-3 flex items-center justify-between'>
           <h3 className={`font-medium ${headingColor}`}>{title}</h3>
-          <span className='text-sm text-neutral-400'>{filteredCards.length}</span>
+          <span className='text-sm text-neutral-400'>{isSucess && filteredCards.length}</span>
         </div>
         <div
           onDragOver={handleDragOver}

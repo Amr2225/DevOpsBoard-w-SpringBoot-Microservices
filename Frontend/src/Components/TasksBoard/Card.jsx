@@ -5,6 +5,7 @@ import { LiaCommentSolid } from "react-icons/lia";
 import { AssignTask, CardMenu } from "../Modals";
 import { useGetCommnetsQuery } from "../../Redux/apis/commentsApi";
 import { useGetAssignedDevsQuery } from "../../Redux/apis/taskApi";
+import { useGetAllUsersQuery } from "../../Redux/apis/userApi";
 
 const Card = ({ title, id, status, description, editable }) => {
   const [isCommentMenuOpen, setIsCommentMenuOpen] = useState(false);
@@ -12,7 +13,8 @@ const Card = ({ title, id, status, description, editable }) => {
   const [isAssignTaskMenuOpen, setIsAssignTaskMenuOpen] = useState(false);
 
   const { data: allCommentsData, isSuccess } = useGetCommnetsQuery(+id);
-  const { data: assignedDevs, isSuccess: isAssignedDevsSuccess } = useGetAssignedDevsQuery(+id);
+  const { data: assignedDevsData, isSuccess: isAssignedDevsSuccess } = useGetAssignedDevsQuery(+id);
+  const { data: allUsersData, isSuccess: usersDataSuccess } = useGetAllUsersQuery();
 
   const AssignedMenuRef = useRef(null);
 
@@ -24,7 +26,15 @@ const Card = ({ title, id, status, description, editable }) => {
   // Assigned developers to each task
   let firstFive;
   let restCount;
-  if (isAssignedDevsSuccess) {
+  let assignedDevs;
+  if (isAssignedDevsSuccess && usersDataSuccess) {
+    assignedDevs = assignedDevsData.map((assignedDev) => {
+      const foundUser = allUsersData.find((user) => user.id === assignedDev.userId);
+      if (foundUser) {
+        return { id: foundUser.id, userName: foundUser.name };
+      }
+    });
+
     firstFive = assignedDevs.slice(0, 5);
     restCount = assignedDevs.slice(5).reduce((acc) => acc + 1, 0);
   }
@@ -55,6 +65,7 @@ const Card = ({ title, id, status, description, editable }) => {
         <div className='flex justify-between mt-1'>
           <div className='flex ml-2'>
             {isAssignedDevsSuccess &&
+              usersDataSuccess &&
               firstFive.map((developer) => (
                 <span
                   key={developer.id}
@@ -69,7 +80,7 @@ const Card = ({ title, id, status, description, editable }) => {
               ref={AssignedMenuRef}
               className={`w-5 h-5 shadow-icons -ml-2  bg-violet-600/95 hover:bg-violet-500 cursor-pointer text-neutral-50 rounded-full grid place-content-center text-xs`}
             >
-              {`+${isAssignedDevsSuccess && restCount}`}
+              {`+${isAssignedDevsSuccess && usersDataSuccess && restCount}`}
             </span>
           </div>
           <div

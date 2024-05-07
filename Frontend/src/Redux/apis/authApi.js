@@ -5,7 +5,7 @@ import { setAuthToken } from "../reducers/UserReducer";
 
 const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5164/api/Auth/" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8083/api/Auth/" }),
   endpoints: (builder) => ({
     register: builder.mutation({
       query: (userData) => ({

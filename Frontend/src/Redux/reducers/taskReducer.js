@@ -4,6 +4,8 @@ const taskSlice = createSlice({
   name: "tasks",
   initialState: {
     taskData: [],
+    isLoading: false,
+    isError: false,
   },
   reducers: {
     setTasksData: (state, action) => {
